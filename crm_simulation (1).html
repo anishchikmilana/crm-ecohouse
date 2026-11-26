@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Симуляция логики CRM для экодомов</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f3f5f1;--card:#fff;--ink:#1f2a24;--mut:#5a675f;--line:#dfe5df;--pri:#2f6b4f;--prit:#fff;--soft:#e3eee7;--amb:#f2c879;--ambt:#3a2a05;--blue:#cfe3f5;--bluet:#14354f;--gray:#e4e7e4;--grayt:#3d4a43;--err:#b3261e;--errbg:#fbe9e7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151a17;--card:#1e2622;--ink:#e7ede9;--mut:#a3b0a8;--line:#33403a;--pri:#4e9a76;--prit:#0d1a13;--soft:#243a2f;--amb:#8a6a1f;--ambt:#fbeccb;--blue:#1f3a52;--bluet:#cfe3f5;--gray:#2c3531;--grayt:#c9d3cd;--err:#ff8a80;--errbg:#3a1f1d}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#151a17;--card:#1e2622;--ink:#e7ede9;--mut:#a3b0a8;--line:#33403a;--pri:#4e9a76;--prit:#0d1a13;--soft:#243a2f;--amb:#8a6a1f;--ambt:#fbeccb;--blue:#1f3a52;--bluet:#cfe3f5;--gray:#2c3531;--grayt:#c9d3cd;--err:#ff8a80;--errbg:#3a1f1d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Manrope,system-ui,sans-serif}
+#app{max-width:1120px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:0}h2{font-size:17px;margin:0 0 10px}.m{color:var(--mut);margin:4px 0 0;font-size:14px}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.b{height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--pri);background:var(--card);color:var(--pri);font:700 14px Manrope,sans-serif;cursor:pointer}
+.b.p{background:var(--pri);color:var(--prit)}.b:disabled{opacity:.4;cursor:not-allowed}
+select,input{height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--card);color:var(--ink);font:14px Manrope,sans-serif;max-width:100%}
+label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mut)}.ctl label{flex-direction:row;align-items:center;gap:6px;font-size:14px}
+.fr{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.tabs .b.on{background:var(--soft)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}@media(max-width:860px){.main{grid-template-columns:1fr}}
+.g{display:grid;grid-template-columns:78px repeat(14,minmax(0,1fr));grid-auto-rows:44px;align-items:center;min-width:640px}
+.sc{overflow-x:auto}.dh{grid-row:1;text-align:center;font-size:11px;color:var(--mut);line-height:1.2}
+.hl{font-weight:700;font-size:13px}.cell{border-left:1px solid var(--line);height:100%}
+.bar{height:32px;margin:0 2px;border:0;border-radius:8px;font:600 11px Manrope,sans-serif;padding:0 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;z-index:1;text-align:left}
+.pri{background:var(--pri);color:var(--prit)}.amb{background:var(--amb);color:var(--ambt)}.blue{background:var(--blue);color:var(--bluet)}.gray{background:var(--gray);color:var(--grayt)}.sel{outline:3px solid var(--ink);outline-offset:1px}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.err{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--errbg);color:var(--err);font-weight:600}.err .b{margin:6px 6px 0 0;height:32px}
+.t{width:100%;border-collapse:collapse;font-size:14px}.t th{text-align:left;color:var(--mut);font-weight:600;font-size:12px;padding:8px;border-bottom:1px solid var(--line)}.t td{padding:9px 8px;border-bottom:1px solid var(--line)}.an td{opacity:.55;text-decoration:line-through}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin:8px 0}.kv span:nth-child(odd){color:var(--mut)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}ol.lg{margin:0;padding-left:0;list-style:none;font-size:12.5px;color:var(--mut)}ol.lg li{padding:4px 0;border-bottom:1px solid var(--line)}
+.ok{color:var(--pri);font-weight:700}.no{color:var(--err);font-weight:700}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const HN=['Домик № 1','Домик № 2','Домик № 3','Домик № 4'],PR=210,HOLD=['draft','pending','confirmed','checked_in'];
+const ST={draft:['Черновик','gray'],pending:['Ожидает оплаты','amb'],confirmed:['Подтверждена','pri'],checked_in:['Гость заехал','blue'],checked_out:['Гость выехал','gray'],cancelled:['Отменена','gray']};
+let S,role='owner',sel=null,tab='cal',msg='',tests=null,fm={h:3,ci:19,co:22,g:'Тестовый гость',doc:'1234'};
+const $=i=>document.getElementById(i),e=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tot=b=>(b.co-b.ci)*PR,pre=b=>Math.round(tot(b)*0.3),fT=T=>Math.floor(T/24)+'.12, '+String(T%24).padStart(2,'0')+':00';
+const canJ=r=>r=='owner',dm=(r,d)=>r=='owner'?d:'••••';
+function init(){const B=(id,h,g,doc,ci,co,st,paid,cr)=>({id,h,g,doc,ci,co,st,paid,cr});
+return{T:16*24+12,nb:8,nt:2,log:['16.12, 12:00 — Система запущена: тестовые данные загружены'],
+bk:[B(1,0,'Петрова Е.','8830',15,18,'checked_in',189,0),B(2,0,'Сидоров И.','3050',22,26,'confirmed',252,0),B(3,1,'Лис А.','1277',16,18,'confirmed',126,0),B(4,1,'Ковалёв Д.','5252',25,28,'pending',0,15*24+20),B(5,2,'Новик А.','4521',14,16,'checked_out',126,0),B(6,2,'Иванова О.','2290',20,22,'pending',0,15*24+20),B(7,3,'Мельник К.','6049',17,21,'confirmed',252,0)],
+j:[[1,5],[2,1],[3,3],[4,7],[5,2]].map(([n,b])=>({n,b,g:'',doc:'',h:0,ci:0,co:0,ann:0})),tk:[{id:1,t:'Уборка после выезда',h:2,due:16*24+12,done:0,auto:1,b:5}]}}
+function fixJ(){S.j.forEach(j=>{if(!j.g){const b=S.bk.find(x=>x.id==j.b);Object.assign(j,{g:b.g,doc:b.doc,h:b.h,ci:b.ci,co:b.co})}})}
+const L=s=>S.log.unshift(fT(S.T)+' — '+s);
+const ov=(h,ci,co,id)=>S.bk.find(b=>b.h==h&&b.id!=id&&HOLD.includes(b.st)&&ci<b.co&&b.ci<co);
+function create(h,ci,co,g,doc){
+ if(!g||!doc)return{ok:0,e:'Укажите гостя и номер документа (он нужен для журнала учёта).'};
+ if(!(ci>=14&&co<=31&&ci<co))return{ok:0,e:'Проверьте даты: выезд должен быть позже заезда (декабрь 2026, 14–31).'};
+ const c=ov(h,ci,co);
+ if(c){const alt=HN.map((_,i)=>i).filter(i=>i!=h&&!ov(i,ci,co));L('Отказ: '+HN[h]+' занят с '+c.ci+' по '+c.co+'.12 ('+c.g+')');return{ok:0,c,alt,e:HN[h]+' занят с '+c.ci+' по '+c.co+'.12 ('+c.g+'). Бронь не создана: сработало ограничение EXCLUDE.'}}
+ const b={id:S.nb++,h:+h,g,doc,ci,co,st:'draft',paid:0,cr:S.T};S.bk.push(b);L('Создана бронь №'+b.id+' ('+HN[h]+', '+ci+'–'+co+'.12), статус «Черновик», даты удерживаются');return{ok:1,b}}
+function invoice(b){if(b.st!='draft')return;b.st='pending';b.cr=S.T;L('Бронь №'+b.id+': выставлен счёт ЕРИП на предоплату '+pre(b)+' BYN (30 %), таймер 24 ч')}
+function confirm(b){b.st='confirmed';const n=Math.max(0,...S.j.map(x=>x.n))+1;S.j.push({n,b:b.id,g:b.g,doc:b.doc,h:b.h,ci:b.ci,co:b.co,ann:0});L('Бронь №'+b.id+' подтверждена: запись №'+n+' в журнале, гостю отправлено уведомление в Telegram')}
+function pay(b,a,m){if(b.st!='pending')return 'Оплата возможна только для брони «Ожидает оплаты»';if(!(a>0))return 'Укажите сумму';b.paid+=a;L(m+': '+a+' BYN (внесено '+b.paid+' из '+pre(b)+' BYN)');if(b.paid>=pre(b))confirm(b);else L('Предоплата меньше 30 % — бронь остаётся «Ожидает оплаты»')}
+function checkin(b){if(b.st!='confirmed')return 'Заезд возможен только для подтверждённой брони';if(S.T<b.ci*24+14)return 'Заезд доступен с 14:00 даты заезда ('+b.ci+'.12). Сдвиньте время.';b.st='checked_in';L('Бронь №'+b.id+': гость заехал')}
+function checkout(b){if(b.st!='checked_in')return 'Выезд возможен только после заезда';if(S.T<b.co*24+12)return 'Выезд доступен с 12:00 даты выезда ('+b.co+'.12). Сдвиньте время.';b.st='checked_out';S.tk.push({id:S.nt++,t:'Уборка после выезда',h:b.h,due:S.T,done:0,auto:1,b:b.id});L('Бронь №'+b.id+': гость выехал, создана задача «Уборка после выезда»')}
+function cancel(b){if(!['draft','pending','confirmed'].includes(b.st))return 'После заезда отмена не предусмотрена';b.st='cancelled';S.j.filter(j=>j.b==b.id).forEach(j=>j.ann=1);S.tk.filter(t=>t.b==b.id&&!t.done).forEach(t=>t.x=1);L('Бронь №'+b.id+' отменена, даты освобождены, запись журнала аннулирована')}
+function tick(){S.bk.forEach(b=>{if(['draft','pending'].includes(b.st)&&S.T-b.cr>=24){b.st='cancelled';L('Таймер 24 ч: бронь №'+b.id+' отменена, даты освобождены')}
+ if(b.st=='confirmed'&&S.T>=b.ci*24+14-24&&!S.tk.some(t=>t.b==b.id&&t.t=='Подготовка к заезду')){S.tk.push({id:S.nt++,t:'Подготовка к заезду',h:b.h,due:b.ci*24+14,done:0,auto:1,b:b.id});L('За 24 ч до заезда создана задача «Подготовка к заезду» ('+HN[b.h]+')')}})}
+function advance(h){for(let i=0;i<h;i++){S.T++;tick()}}
+function act(a,id){const b=S.bk.find(x=>x.id==id);let r;msg='';
+ if(a=='alt'){fm.h=id;a='mk'}
+ if(a=='mk'){const x=create(+fm.h,+fm.ci,+fm.co,fm.g.trim(),fm.doc.trim());if(x.ok){sel=x.b.id}else msg=x}
+ else if(a=='inv')invoice(b);else if(a=='erip')r=pay(b,+$('amt').value,'Оплата через ЕРИП (вебхук)');else if(a=='cash')r=pay(b,+$('amt').value,'Предоплата наличными');
+ else if(a=='in')r=checkin(b);else if(a=='out')r=checkout(b);else if(a=='cx')r=cancel(b);
+ else if(a=='done'){const t=S.tk.find(x=>x.id==id);t.done=1;L('Задача «'+t.t+'» ('+HN[t.h]+') выполнена')}
+ else if(a=='adv')advance(id);else if(a=='rst'){S=init();fixJ();sel=null}
+ if(typeof r=='string')msg={e:r};R()}
+function setRole(v){role=v;if(v=='admin'&&tab=='j')tab='cal';R()}
+function runTests(){const sv=S,out=[];
+ const T=(n,x,f)=>{S=init();fixJ();let o,p;try{[p,o]=f()}catch(z){p=0;o=String(z)}out.push([n,x,o,p])};
+ T('Овербукинг','Домик № 4 на 19–22.12 блокируется, предложены Домики № 1 и № 2',()=>{const r=create(3,19,22,'Т','1'),al=(r.alt||[]).map(i=>i+1).join(', ');return[!r.ok&&al=='1, 2','блокировка: '+(r.ok?'нет':'да')+'; свободно: Домики '+al]});
+ T('Смена гостей в один день','Домик № 4 на 21–24.12 разрешён (выезд Мельника 21.12)',()=>{const r=create(3,21,24,'Т','1');return[!!r.ok,'бронь '+(r.ok?'создана':'отклонена')]});
+ T('Порог предоплаты 30 %','100 BYN из 126: остаётся «Ожидает оплаты»; 126 BYN: «Подтверждена» + запись журнала',()=>{const b=create(1,19,21,'Т','1').b;invoice(b);const n=S.j.length;pay(b,100,'ЕРИП');const a=b.st;pay(b,26,'ЕРИП');return[a=='pending'&&b.st=='confirmed'&&S.j.length==n+1,'после 100 BYN: '+ST[a][0]+'; после 126 BYN: '+ST[b.st][0]+'; записей журнала +'+(S.j.length-n)]});
+ T('Таймер 24 часа','Неоплаченная бронь Ивановой отменяется, даты Домика № 3 освобождаются',()=>{advance(8);const b=S.bk.find(x=>x.id==6),r=create(2,20,22,'Т','1');return[b.st=='cancelled'&&!!r.ok,'статус: '+ST[b.st][0]+'; новая бронь на те же даты: '+(r.ok?'создана':'отклонена')]});
+ T('Отмена подтверждённой брони','Статус «Отменена», запись журнала аннулирована',()=>{const b=S.bk.find(x=>x.id==3);cancel(b);const j=S.j.find(x=>x.b==3);return[b.st=='cancelled'&&j.ann==1,'статус: '+ST[b.st][0]+'; запись журнала '+(j.ann?'аннулирована':'действует')]});
+ T('Права доступа','Администратору недоступен журнал, номер документа скрыт',()=>[!canJ('admin')&&dm('admin','8830')=='••••'&&dm('owner','8830')=='8830','журнал для администратора: '+(canJ('admin')?'доступен':'скрыт')+'; документ: '+dm('admin','8830')]);
+ T('Автоматические задачи','«Подготовка к заезду» за 24 ч до заезда; «Уборка после выезда» при выезде',()=>{pay(S.bk.find(x=>x.id==6),126,'ЕРИП');advance(74);const p=S.tk.some(t=>t.b==6&&t.t=='Подготовка к заезду');const b1=S.bk.find(x=>x.id==1);checkout(b1);const c=S.tk.some(t=>t.b==1&&t.t=='Уборка после выезда');return[p&&c,'подготовка: '+(p?'создана':'нет')+'; уборка: '+(c?'создана':'нет')]});
+ S=sv;tests=out;R()}
+function R(){let o=`<div class="top"><div><h1>Симуляция логики CRM для экодомов</h1><p class="m">Проверка проектных решений главы 3. Данные хранятся в памяти страницы, ЕРИП и Telegram имитируются. Текущее время модели: <b>${fT(S.T)}</b></p></div>
+<div class="ctl"><label>Роль <select onchange="setRole(this.value)"><option value="owner"${role=='owner'?' selected':''}>Владелец</option><option value="admin"${role=='admin'?' selected':''}>Администратор</option></select></label>
+<button class="b" onclick="act('adv',1)">+1 ч</button><button class="b" onclick="act('adv',24)">+24 ч</button><button class="b" onclick="act('rst')">Сбросить</button></div></div>
+<div class="tabs">${[['cal','Календарь'],['j','Журнал учёта'],['t','Задачи'],['q','Проверки логики']].map(([k,n])=>`<button class="b${tab==k?' on':''}" ${k=='j'&&!canJ(role)?'disabled title="Только для владельца"':''} onclick="tab='${k}';msg='';R()">${n}</button>`).join('')}</div><div class="main"><div>`;
+ if(tab=='cal'){o+=`<div class="card"><h2>Новая бронь</h2><div class="fr"><label>Домик<select oninput="fm.h=this.value">${HN.map((n,i)=>`<option value="${i}"${fm.h==i?' selected':''}>${n}</option>`).join('')}</select></label>
+<label>Заезд (дек.)<input type="number" min="14" max="30" style="width:84px" value="${fm.ci}" oninput="fm.ci=this.value"></label><label>Выезд (дек.)<input type="number" min="15" max="31" style="width:84px" value="${fm.co}" oninput="fm.co=this.value"></label>
+<label>Гость<input value="${e(fm.g)}" oninput="fm.g=this.value"></label><label>Номер документа<input style="width:120px" value="${e(fm.doc)}" oninput="fm.doc=this.value"></label><button class="b p" onclick="act('mk')">Создать бронь</button></div>`;
+ if(msg&&msg.e&&!sel||msg&&msg.c)o+=`<div class="err" role="alert">${e(msg.e)}${msg.alt?(msg.alt.length?'<br>Свободно на те же даты: '+msg.alt.map(i=>`<button class="b" onclick="act('alt',${i})">${HN[i]}</button>`).join(''):'<br>На эти даты свободных домиков нет.'):''}</div>`;
+ o+=`</div><div class="card sc"><h2>Календарь, декабрь 2026</h2><div class="g">`;
+ for(let d=14;d<28;d++)o+=`<div class="dh" style="grid-column:${d-12}">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][(d-14)%7]}<br><b>${d}</b></div>`;
+ HN.forEach((n,i)=>{o+=`<div class="hl" style="grid-row:${i+2};grid-column:1">${n}</div>`;for(let d=14;d<28;d++)o+=`<i class="cell" style="grid-row:${i+2};grid-column:${d-12}"></i>`;
+ S.bk.filter(b=>b.h==i&&b.st!='cancelled').forEach(b=>{const s=Math.max(b.ci,14),en=Math.min(b.co,28);if(s<en)o+=`<button class="bar ${ST[b.st][1]}${sel==b.id?' sel':''}" style="grid-row:${i+2};grid-column:${s-12}/${en-12}" onclick="sel=${b.id};msg='';R()">${e(b.g)} · ${ST[b.st][0]}</button>`})});
+ o+=`</div><p class="m">Нажмите на бронь, чтобы увидеть детали и действия. Цвет дублируется подписью статуса.</p></div>`;
+ const b=S.bk.find(x=>x.id==sel);
+ if(b){const dis=(c,t)=>c?'':`disabled title="${t}"`;o+=`<div class="card"><h2>Бронь №${b.id}: ${HN[b.h]}, ${b.ci}–${b.co}.12 <span class="chip ${ST[b.st][1]}">${ST[b.st][0]}</span></h2><div class="kv"><span>Гость</span><span>${e(b.g)}</span><span>Документ</span><span>${dm(role,e(b.doc))}</span><span>Сумма</span><span>${tot(b)} BYN</span><span>Предоплата 30 %</span><span>${pre(b)} BYN (внесено ${b.paid})</span>${['draft','pending'].includes(b.st)?`<span>Даты удерживаются до</span><span>${fT(b.cr+24)}</span>`:''}</div>
+<div class="acts"><button class="b" ${dis(b.st=='draft','Только для черновика')} onclick="act('inv',${b.id})">Выставить счёт ЕРИП</button><input id="amt" type="number" min="1" style="width:90px" value="${Math.max(pre(b)-b.paid,1)}" aria-label="Сумма оплаты"><button class="b" ${dis(b.st=='pending','Только для брони «Ожидает оплаты»')} onclick="act('erip',${b.id})">Имитировать оплату ЕРИП</button><button class="b" ${dis(b.st=='pending','Только для брони «Ожидает оплаты»')} onclick="act('cash',${b.id})">Наличные</button></div>
+<div class="acts"><button class="b" ${dis(b.st=='confirmed','Нужна подтверждённая бронь')} onclick="act('in',${b.id})">Отметить заезд</button><button class="b" ${dis(b.st=='checked_in','Нужен заезд')} onclick="act('out',${b.id})">Отметить выезд</button><button class="b" ${dis(['draft','pending','confirmed'].includes(b.st),'После заезда отмена не предусмотрена')} onclick="act('cx',${b.id})">Отменить бронь</button></div>${msg&&msg.e?`<div class="err" role="alert">${e(msg.e)}</div>`:''}</div>`}}
+ if(tab=='j')o+=`<div class="card"><h2>Журнал учёта гостей</h2><table class="t"><thead><tr><th>№</th><th>ФИО</th><th>Документ</th><th>Заезд</th><th>Выезд</th><th>Экодом</th><th>Статус записи</th></tr></thead><tbody>${[...S.j].sort((a,b)=>a.n-b.n).map(j=>`<tr class="${j.ann?'an':''}"><td>${j.n}</td><td>${e(j.g)}</td><td>${dm(role,e(j.doc))}</td><td>${j.ci}.12</td><td>${j.co}.12</td><td>${HN[j.h]}</td><td>${j.ann?'Аннулирована':'Действует'}</td></tr>`).join('')}</tbody></table><p class="m">Запись создаётся только при переходе брони в «Подтверждена» (BR-02).</p></div>`;
+ if(tab=='t')o+=`<div class="card"><h2>Задачи обслуживания</h2><table class="t"><thead><tr><th>Задача</th><th>Экодом</th><th>Срок</th><th>Источник</th><th>Статус</th><th></th></tr></thead><tbody>${S.tk.map(t=>`<tr><td><b>${t.t}</b></td><td>${HN[t.h]}</td><td>${fT(t.due)}</td><td>${t.auto?'Авто':'Вручную'}</td><td>${t.x?'Отменена':t.done?'Выполнена':'Ожидает'}</td><td>${t.done||t.x?'':`<button class="b" onclick="act('done',${t.id})">Выполнена</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+ if(tab=='q'){o+=`<div class="card"><h2>Проверки логики</h2><p class="m">Каждый сценарий запускается на чистых тестовых данных и сверяется с правилами проекта (таблица 3.3, п. 3.5.3, BR-01…BR-05).</p><button class="b p" onclick="runTests()">Запустить все проверки</button>`;
+ if(tests){const k=tests.filter(x=>x[3]).length;o+=`<p><b class="${k==tests.length?'ok':'no'}">Пройдено ${k} из ${tests.length}</b></p><table class="t"><thead><tr><th></th><th>Сценарий</th><th>Ожидается</th><th>Получено</th></tr></thead><tbody>${tests.map(x=>`<tr><td class="${x[3]?'ok':'no'}">${x[3]?'✓':'✗'}</td><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('')}</tbody></table>`}o+=`</div>`}
+ o+=`</div><div class="card"><h2>События системы</h2><ol class="lg">${S.log.slice(0,14).map(x=>`<li>${e(x)}</li>`).join('')}</ol></div></div>`;$('app').innerHTML=o}
+S=init();fixJ();R();
+</script>
+</body>
+</html>
